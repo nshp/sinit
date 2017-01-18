@@ -146,7 +146,7 @@ spawn_as(uid_t uid, gid_t gid, char *const env[], char *const argv[])
 	/* printf("spawn_as %d,%d: %s\n", uid, gid, argv[0]); */
 	switch (fork()) {
 	case 0:
-		chdir("/home/nick");
+		chdir(HOMEDIR);
 		sigprocmask(SIG_UNBLOCK, &set, NULL);
 		setsid();
 		ioctl(STDIN_FILENO, TIOCSCTTY, 0);
