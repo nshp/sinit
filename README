@@ -1,13 +1,22 @@
-sinit - suckless init
-=====================
+sinit - suckless init - nshp's fork
+===================================
 
 sinit is a simple init.  It was initially based on
 Rich Felker's minimal init[1].
 
+What's different?
+----------------
+My fork of sinit adds:
+
+* Service forking defined in config.h with very dumb dependency tracking
+* A single user session defined in config.h
+* Base system mounting defined in config.h
+* Static reboot and poweroff binaries which just send the signals listed below
+
 Why?
 ----
 
-I wanted to get rid of Busybox init on my toy distro[2].
+I wanted a fast, completely static init for my laptop.
 
 How?
 ----
@@ -17,10 +26,3 @@ There are 3 signals that sinit will act on.
       SIGUSR1: powers off the machine.
       SIGINT:  reboots the machine (or alternatively via ctrl-alt-del).
       SIGCHLD: reap children
-
-To see how sinit integrates with the init scripts, then have
-a look at [3].
-
-[1] https://gist.github.com/rofl0r/6168719
-[2] http://git.2f30.org/morpheus/
-[3] http://git.2f30.org/ports/tree/fs/

@@ -1,9 +1,11 @@
 include config.mk
+CC = musl-gcc
 
 OBJ = sinit.o
 BIN = sinit
+CFLAGS = $(shell pkg-config --cflags libevdev) -Os
 
-all: $(BIN)
+all: $(BIN) poweroff reboot
 
 $(BIN): $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
