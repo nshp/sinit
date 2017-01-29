@@ -25,7 +25,6 @@ static gid_t const groups[] = {
 	92, 	/* audio */
 };
 
-int wpa_started(void);
 int udev_settled(void);
 
 static struct {
@@ -37,10 +36,8 @@ static struct {
 	NULL, 		{ "/usr/bin/udevd", "--daemon", NULL },
 	NULL, 		{ "/usr/bin/udevadm", "trigger", "-c", "add", NULL },
 	NULL, 		{ "/usr/bin/udevadm", "settle", NULL },
-	NULL, 		{ "/usr/bin/wpa_supplicant", "-iwlan0", "-c", "/etc/wpa_supplicant/wpa_supplicant.conf", NULL },
 	NULL, 		{ "/usr/bin/thermald", NULL },
-	wpa_started,  	{ "/usr/bin/wpa_cli", "-a", "/usr/local/bin/run_dhcpcd.sh", NULL },
-	wpa_started,  	{ "/usr/bin/dhcpcd", "wlan0", NULL },
+	NULL,		{ "/usr/bin/dhcpcd", "-M", NULL },
 	udev_settled, 	{ "/usr/bin/illum-d", NULL },
 };
 

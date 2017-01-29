@@ -3,7 +3,7 @@ CC = musl-gcc
 
 OBJ = sinit.o
 BIN = sinit
-CFLAGS = $(shell pkg-config --cflags libevdev) -Os
+CFLAGS = -Os
 
 all: $(BIN) poweroff reboot
 

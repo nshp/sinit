@@ -7,7 +7,6 @@
 
 #include <fcntl.h>
 #include <grp.h>
-#include <err.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -174,16 +173,10 @@ mounts(void)
 			  static_mounts[i].flags,
 			  static_mounts[i].data) != 0)
 		{
-			warn("mount %s", static_mounts[i].target);
+			perror(static_mounts[i].target);
 		}
 
 	}
-}
-
-int
-wpa_started(void)
-{
-	return ! access("/var/run/wpa_supplicant/wlan0", O_RDONLY);
 }
 
 int
