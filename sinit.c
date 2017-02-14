@@ -204,6 +204,7 @@ ifup(const char *iface)
 	sk = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sk < 0) {
 		perror("ifup: socket:");
+                return;
 	}
 
 	memset(&ifr, 0, sizeof(struct ifreq));
