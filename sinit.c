@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <net/if.h>
 
 #include <fcntl.h>
 #include <grp.h>
@@ -12,6 +13,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 
 #define LEN(x) (sizeof (x) / sizeof *(x))
 
@@ -21,6 +23,7 @@ static void sigreboot(void);
 static void spawn(int (*)(), char *const []);
 static void spawn_as(uid_t, gid_t, char *const [], char *const []);
 static void mounts(void);
+static void ifup(const char *iface);
 
 static struct {
 	int sig;
@@ -49,10 +52,14 @@ main(void)
 #endif
 
 	chdir("/");
-	sethostname(HOSTNAME, sizeof(HOSTNAME)-1);
-	mounts();
+
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);
+
+	sethostname(HOSTNAME, sizeof(HOSTNAME)-1);
+	mounts();
+	ifup("lo");
+
 	ioctl(STDIN_FILENO, TIOCNOTTY, 0);
 
 	for (i=0;i < LEN(init_procs);i++) {
@@ -186,4 +193,21 @@ udev_settled(void)
 	if (stat("/dev/input/event4", &info))
 		return 0;
 	return info.st_gid == 97; /* input group */
+}
+
+static void
+ifup(const char *iface)
+{
+	struct ifreq ifr;
+	int sk;
+
+	sk = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sk < 0) {
+		perror("ifup: socket:");
+	}
+
+	memset(&ifr, 0, sizeof(struct ifreq));
+	strncpy(ifr.ifr_name, iface, IFNAMSIZ);
+	ifr.ifr_flags |= IFF_UP;
+	ioctl(sk, SIOCSIFFLAGS, &ifr);
 }
