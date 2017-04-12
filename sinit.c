@@ -100,7 +100,7 @@ sigpoweroff(void)
 	sync();
 	reboot(RB_POWER_OFF);
 	/* only reachable on error */
-	perror("poweroff");
+	write(2, "poweroff failed\n", 16);
 }
 
 static void
@@ -118,7 +118,7 @@ sigreboot(void)
 	sync();
 	reboot(RB_AUTOBOOT);
 	/* only reachable on error */
-	perror("reboot");
+	write(2, "reboot failed?\n", 15);
 }
 
 static void
@@ -139,10 +139,10 @@ spawn(int (*dep)(), char *const argv[])
 		}
 		/* printf("spawn: %s\n", argv[0]); */
 		execvp(argv[0], argv);
-		perror("execvp");
+		write(2, "can't exec\n", 11);
 		_exit(1);
 	case -1:
-		perror("fork");
+		write(2, "can't fork\n", 11);
 	}
 }
 
@@ -160,10 +160,10 @@ spawn_as(uid_t uid, gid_t gid, char *const env[], char *const argv[])
 		setgroups(LEN(groups), groups);
 		setuid(uid);
 		execve(argv[0], argv, env);
-		perror("execve");
+		write(2, "can't exec\n", 11);
 		_exit(1);
 	case -1:
-		perror("fork");
+		write(2, "can't fork\n", 11);
 	}
 }
 
@@ -180,7 +180,10 @@ mounts(void)
 			  static_mounts[i].flags,
 			  static_mounts[i].data) != 0)
 		{
-			perror(static_mounts[i].target);
+			write(2, "mount failed for ", 17);
+			write(2, static_mounts[i].target,
+					strlen(static_mounts[i].target));
+			write(2, "\n", 1);
 		}
 
 	}
@@ -203,8 +206,10 @@ ifup(const char *iface)
 
 	sk = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sk < 0) {
-		perror("ifup: socket:");
-                return;
+		write(2, "ifup failed for ", 16);
+		write(2, iface, strlen(iface));
+		write(2, "\n", 1);
+		return;
 	}
 
 	memset(&ifr, 0, sizeof(struct ifreq));
