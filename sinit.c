@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include <sys/ioctl.h>
 
 #define LEN(x) (sizeof (x) / sizeof *(x))
 
@@ -44,14 +45,16 @@ main(void)
 	int sig;
 	size_t i;
 
+#ifdef SANE
 	if (getpid() != 1)
 		return 1;
+
+	chdir("/");
+#endif
 
 #ifdef PERF
 	spawn(NULL, perf);
 #endif
-
-	chdir("/");
 
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);
@@ -99,8 +102,10 @@ sigpoweroff(void)
 	kill_wait();
 	sync();
 	reboot(RB_POWER_OFF);
+#ifdef SANE
 	/* only reachable on error */
 	write(2, "poweroff failed\n", 16);
+#endif
 }
 
 static void
@@ -117,8 +122,10 @@ sigreboot(void)
 	kill_wait();
 	sync();
 	reboot(RB_AUTOBOOT);
+#ifdef SANE
 	/* only reachable on error */
-	write(2, "reboot failed?\n", 15);
+	write(2, "reboot failed\n", 15);
+#endif
 }
 
 static void
@@ -139,10 +146,12 @@ spawn(int (*dep)(), char *const argv[])
 		}
 		/* printf("spawn: %s\n", argv[0]); */
 		execvp(argv[0], argv);
+#ifdef SANE
 		write(2, "can't exec\n", 11);
 		_exit(1);
 	case -1:
 		write(2, "can't fork\n", 11);
+#endif
 	}
 }
 
@@ -160,17 +169,19 @@ spawn_as(uid_t uid, gid_t gid, char *const env[], char *const argv[])
 		setgroups(LEN(groups), groups);
 		setuid(uid);
 		execve(argv[0], argv, env);
+#ifdef SANE
 		write(2, "can't exec\n", 11);
 		_exit(1);
 	case -1:
 		write(2, "can't fork\n", 11);
+#endif
 	}
 }
 
 static void
 mounts(void)
 {
-	int i;
+	size_t i;
 	mkdir("/dev/pts", 0755);
 	mkdir("/dev/shm", 0755);
 	for (i=0;i < LEN(static_mounts);i++) {
@@ -180,10 +191,12 @@ mounts(void)
 			  static_mounts[i].flags,
 			  static_mounts[i].data) != 0)
 		{
+#ifdef SANE
 			write(2, "mount failed for ", 17);
 			write(2, static_mounts[i].target,
 					strlen(static_mounts[i].target));
 			write(2, "\n", 1);
+#endif
 		}
 
 	}
@@ -205,12 +218,14 @@ ifup(const char *iface)
 	int sk;
 
 	sk = socket(AF_INET, SOCK_DGRAM, 0);
+#ifdef SANE
 	if (sk < 0) {
 		write(2, "ifup failed for ", 16);
 		write(2, iface, strlen(iface));
 		write(2, "\n", 1);
 		return;
 	}
+#endif
 
 	memset(&ifr, 0, sizeof(struct ifreq));
 	strncpy(ifr.ifr_name, iface, IFNAMSIZ);

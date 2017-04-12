@@ -1,14 +1,16 @@
 include config.mk
-CC = musl-gcc
+CC = diet -Os gcc
 
 OBJ = sinit.o
 BIN = sinit
-CFLAGS = -Os
+CFLAGS = -Os -flto -s -fno-asynchronous-unwind-tables -fno-unwind-tables
+LDFLAGS = -flto -Os -static -Wl,--gc-sections -Wl,--strip-all -Wl,-z,norelro -fno-asynchronous-unwind-tables -Wl,--build-id=none
 
 all: $(BIN) poweroff reboot
 
 $(BIN): $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
+	strip -R .comment -R .jcr -R .eh_data -R .note -R .eh_frame $@
 
 $(OBJ): config.h
 

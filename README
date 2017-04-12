@@ -13,6 +13,8 @@ My fork of sinit adds:
 * Base system mounting defined in config.h
 * Static reboot and poweroff binaries which just send the signals listed below
 
+When I build this with dietlibc, the resulting binary is currently 5272 bytes.
+
 Why?
 ----
 
